@@ -1,5 +1,4 @@
 # Sparkify Datawarehouse
-***
 
 ## Purpose
 The purpose of this datawarehouse system is to have a single source of truth db for analysts to be able to run different analytical SQL queries and generate reports and insights in an efficient manner. 
@@ -28,52 +27,56 @@ related to users, play sesssions, timestamp of event, etc.
 - This database can be used to get the answer to various anlytical queries, for example,
 
 - To get the top five songs played overall and userwise (uncomment the where clause for userwise data)
-> SELECT song_id, count(songplay_id) play_count
-> FROM songplays sp
-> INNER JOIN songs s USING(song_id)
-> -- WHERE user_id = 16 
-> ORDER BY 2 DESC 
-> LIMIT 5
+```
+  SELECT song_id, count(songplay_id) play_count
+  FROM songplays sp
+  INNER JOIN songs s USING(song_id)
+  -- WHERE user_id = 16
+  ORDER BY 2 DESC
+  LIMIT 5
+```
 
 - To get the part of the day when user is most active (morning/afternoon/evening/late_night)
-> WITH user_data AS (
->     SELECT 
->         user_id, 
->         'morning' part_of_the_day,
->         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 4 AND 11) song_count 
->     FROM songplays
->     INNER JOIN users u USING(user_id)
->     GROUP BY 1
->     UNION ALL
->     SELECT 
->         user_id, 
->         'afternoon' part_of_the_day,
->         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 11 AND 16) song_count 
->     FROM songplays
->     INNER JOIN users u USING(user_id)
->     GROUP BY 1
->     UNION ALL
->     SELECT 
->         user_id, 
->         'evening' part_of_the_day,
->         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 16 AND 22) song_count 
->     FROM songplays
->     INNER JOIN users u USING(user_id)
->     GROUP BY 1
->     UNION ALL
->     SELECT 
->         user_id, 
->         'late_night' part_of_the_day,
->         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 22 AND 4) song_count 
->     FROM songplays
->     INNER JOIN users u USING(user_id)
->     GROUP BY 1
-> )
-> SELECT DISTINCT ON (user_id)
->     user_id, 
->     CONCAT_WS(' ', u.first_name, u.last_name) user_name,
->     part_of_the_day
-> FROM user_data
-> INNER JOIN users u USING(user_id)
-> WHERE song_count > 0
-> ORDER BY 1, 2 DESC
+```
+   WITH user_data AS (  
+     SELECT 
+         user_id, 
+         'morning' part_of_the_day,
+         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 4 AND 11) song_count 
+     FROM songplays
+     INNER JOIN users u USING(user_id)
+     GROUP BY 1
+     UNION ALL
+     SELECT 
+         user_id, 
+         'afternoon' part_of_the_day,
+         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 11 AND 16) song_count 
+     FROM songplays
+     INNER JOIN users u USING(user_id)
+     GROUP BY 1
+     UNION ALL
+     SELECT 
+         user_id, 
+         'evening' part_of_the_day,
+         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 16 AND 22) song_count 
+     FROM songplays
+     INNER JOIN users u USING(user_id)
+     GROUP BY 1
+     UNION ALL
+     SELECT 
+         user_id, 
+         'late_night' part_of_the_day,
+         COUNT(songplay_id) FILTER(WHERE DATE_PART('hour', start_time) BETWEEN 22 AND 4) song_count 
+     FROM songplays
+     INNER JOIN users u USING(user_id)
+     GROUP BY 1
+   )
+   SELECT DISTINCT ON (user_id)
+     user_id, 
+     CONCAT_WS(' ', u.first_name, u.last_name) user_name,
+     part_of_the_day
+   FROM user_data
+   INNER JOIN users u USING(user_id)
+   WHERE song_count > 0
+   ORDER BY 1, 2 DESC
+```
